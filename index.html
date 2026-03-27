@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Matematika: Sistem Penilaian Ujian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .math-content .mjx-chtml {
+            font-size: 1.1em !important;
+        }
+
+        .custom-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+        }
+
+        .option-input:checked + .option-label {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+
+        #modal-overlay {
+            backdrop-filter: blur(4px);
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <div class="max-w-3xl w-full">
+        <!-- Main Container -->
+        <div id="app-container" class="bg-white rounded-3xl custom-shadow overflow-hidden">
+            
+            <!-- Header Section -->
+            <div id="header-bar" class="bg-indigo-600 p-6 text-white text-center">
+                <h1 class="text-2xl font-extrabold tracking-tight uppercase">KUIS MATEMATIKA</h1>
+                <p class="text-indigo-100 text-sm font-medium mt-1 uppercase tracking-widest">Sistem Penilaian Ujian</p>
+            </div>
+
+            <!-- Landing Section -->
+            <div id="landingSection" class="p-8">
+                <div class="space-y-6">
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-amber-700 font-bold">INSTRUKSI PENGERJAAN:</p>
+                                <ul class="mt-1 text-sm text-amber-700 list-disc list-inside">
+                                    <li>Materi: Logika Aritmetika (Sistem Skor)</li>
+                                    <li>Jumlah: 10 Soal Pilihan Ganda</li>
+                                    <li>Waktu: 10 Menit</li>
+                                    <li>Dilarang berpindah tab selama pengerjaan</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="userName" class="block text-sm font-bold text-gray-700">Nama Lengkap:</label>
+                        <input type="text" id="userName" 
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all outline-none" 
+                               placeholder="Masukkan nama Anda...">
+                    </div>
+
+                    <button onclick="mulaiKuis()" 
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-95 transition-all text-lg tracking-wide">
+                        MULAI KUIS
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quizSection" class="hidden">
+                <div class="bg-gray-50 border-b border-gray-100 p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-10">
+                    <div class="flex items-center space-x-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
+                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="time" class="font-mono text-xl font-bold text-red-600">10:00</span>
+                    </div>
+                    <div class="w-full sm:w-1/2 bg-gray-200 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="isiSoal" class="p-6 space-y-8 max-h-[60vh] overflow-y-auto"></div>
+
+                <div class="p-6 border-t border-gray-100">
+                    <button id="btnSelesai" onclick="tampilkanKonfirmasiSelesai()" 
+                            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all text-lg">
+                        SELESAI & KIRIM
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="resultSection" class="hidden p-8 text-center space-y-6">
+                <div class="flex justify-center">
+                    <div id="scoreRing" class="relative w-40 h-40 flex items-center justify-center rounded-full border-8 border-indigo-100">
+                        <span id="displaySkor" class="text-5xl font-extrabold text-indigo-600">0</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold text-gray-800">Kerja Bagus, <span id="resNama" class="text-indigo-600"></span>!</h2>
+                    <p class="text-gray-500">Hasil latihan Anda telah tercatat di sistem kami.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                        <p class="text-xs text-emerald-600 font-bold uppercase tracking-wider">Benar</p>
+                        <p id="totalBenar" class="text-2xl font-bold text-emerald-700">0</p>
+                    </div>
+                    <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                        <p class="text-xs text-rose-600 font-bold uppercase tracking-wider">Salah</p>
+                        <p id="totalSalah" class="text-2xl font-bold text-rose-700">0</p>
+                    </div>
+                </div>
+
+                <div id="detailList" class="text-left bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm space-y-2"></div>
+
+                <div class="flex flex-col space-y-3">
+                    <p id="statusKirim" class="text-xs font-semibold animate-pulse text-gray-400 italic">Menyimpan hasil ke cloud...</p>
+                    <button onclick="location.reload()" class="bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-black transition-all">
+                        COBA LAGI
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal System -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl transform transition-all scale-100">
+            <div id="modal-icon" class="mb-4 flex justify-center"></div>
+            <h3 id="modal-title" class="text-xl font-bold text-gray-900 text-center mb-2"></h3>
+            <p id="modal-desc" class="text-gray-500 text-center text-sm mb-6"></p>
+            <div id="modal-actions" class="flex space-x-3">
+                <button id="modal-btn-primary" class="flex-1 py-2 rounded-lg font-bold transition-all"></button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyYpM76UmX1SO7XuW46G8lSyg8WFF40bNWlcfz4sAPiKPdaGV9gSgrvdvaJZGOZwAJa/exec';
+
+    const soalData = [
+        { q: "Dalam kompetisi matematika (50 soal), aturan: benar skor 4, salah -2, tidak dijawab -1. Jika Budi benar 35 dan 5 tidak dijawab, skornya adalah ....", a: ["115", "120", "135", "140"], k: 0 },
+        { q: "Ujian masuk sekolah (40 soal). Skor: benar 5, salah -3, tidak diisi -1. Ani menjawab benar 30 soal dan salah 8 soal. Skor Ani adalah ....", a: ["124", "126", "132", "150"], k: 0 },
+        { q: "Tes 100 soal. Benar nilai 4, salah -1, tidak dijawab 0. Peserta menjawab benar 85 soal dan 10 soal tidak dijawab. Nilai peserta adalah ....", a: ["330", "335", "340", "345"], k: 1 },
+        { q: "Kuis cerdas cermat (75 soal). Skor: benar 4, salah -2, tidak dijawab -1. Iwan benar 60 soal dan tidak menjawab 7 soal. Skor Iwan adalah ....", a: ["210", "217", "225", "240"], k: 1 },
+        { q: "Ujian 120 soal. Benar nilai 3, salah -1, tidak dijawab 0. Seorang siswa menjawab benar 95 soal dan salah 15 soal. Nilainya adalah ....", a: ["270", "285", "300", "315"], k: 0 },
+        { q: "Tes bakat (50 soal). Benar dinilai 10, salah -5, tidak dijawab -2. Jika Roni benar 42 soal dan 3 soal tidak dijawab, skor Roni adalah ....", a: ["389", "395", "405", "420"], k: 0 },
+        { q: "Tes masuk kerja (80 soal). Benar (skor 4), salah (-2), kosong (-1). Siska menjawab benar 68 soal dan kosong 4 soal. Skor total Siska adalah ....", a: ["252", "256", "260", "272"], k: 0 },
+        { q: "Olimpiade sains (60 soal). Skor benar 5, salah -2, tidak dijawab 0. Jika Andi benar 48 soal dan salah 7 soal, total nilainya adalah ....", a: ["220", "226", "235", "240"], k: 1 },
+        { q: "Kuis 45 soal. Skor: benar 4, salah -2, tidak dijawab -1. Jika Ratih benar 38 soal dan tidak menjawab 2 soal, skor Ratih adalah ....", a: ["135", "140", "142", "152"], k: 1 },
+        { q: "Tes matematika (100 soal). Benar skor 5, salah -2, tidak dijawab 1. Jika Dito benar 78 soal dan salah 12 soal, skor Dito adalah ....", a: ["350", "356", "366", "390"], k: 1 }
+    ];
+
+    let timer;
+    let tabPindahCount = 0;
+    let quizActive = false;
+
+    function showModal(config) {
+        const overlay = document.getElementById('modal-overlay');
+        const title = document.getElementById('modal-title');
+        const desc = document.getElementById('modal-desc');
+        const icon = document.getElementById('modal-icon');
+        const btnPrimary = document.getElementById('modal-btn-primary');
+        const actions = document.getElementById('modal-actions');
+
+        title.innerText = config.title;
+        desc.innerText = config.desc;
+        btnPrimary.innerText = config.btnText || "OK";
+        btnPrimary.className = `flex-1 py-2 rounded-lg font-bold text-white transition-all ${config.btnClass || 'bg-indigo-600'}`;
+        
+        while(actions.children.length > 1) actions.removeChild(actions.lastChild);
+
+        if(config.showCancel) {
+            const btnCancel = document.createElement('button');
+            btnCancel.innerText = config.cancelText || "Batal";
+            btnCancel.className = "flex-1 py-2 rounded-lg font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all";
+            btnCancel.onclick = () => { overlay.style.display = 'none'; };
+            actions.insertBefore(btnCancel, btnPrimary);
+        }
+
+        icon.innerHTML = config.icon || '';
+        btnPrimary.onclick = () => {
+            overlay.style.display = 'none';
+            if(config.onConfirm) config.onConfirm();
+        };
+
+        overlay.style.display = 'flex';
+    }
+
+    window.onblur = function() {
+        if (quizActive) {
+            tabPindahCount++;
+            if (tabPindahCount >= 2) {
+                showModal({
+                    title: "Kuis Dihentikan",
+                    desc: "Anda telah keluar dari halaman kuis berulang kali. Skor akan langsung dihitung.",
+                    btnText: "LIHAT HASIL",
+                    btnClass: "bg-red-600",
+                    onConfirm: () => hitungDanTampilkanHasil()
+                });
+                hitungDanTampilkanHasil();
+            } else {
+                showModal({
+                    title: "Peringatan Anti-Contek",
+                    desc: "Dilarang membuka tab lain! Pelanggaran berikutnya akan menghentikan kuis secara otomatis.",
+                    btnText: "SAYA MENGERTI",
+                    btnClass: "bg-amber-600",
+                    icon: `<div class="bg-amber-100 p-3 rounded-full"><svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>`
+                });
+            }
+        }
+    };
+
+    function mulaiKuis() {
+        const nama = document.getElementById('userName').value.trim();
+        if (!nama) {
+            showModal({ title: "Nama Belum Diisi", desc: "Silakan masukkan nama Anda untuk memulai.", btnText: "OKE" });
+            return;
+        }
+
+        document.getElementById('landingSection').classList.add('hidden');
+        document.getElementById('quizSection').classList.remove('hidden');
+        quizActive = true;
+
+        let html = "";
+        soalData.forEach((s, i) => {
+            html += `
+                <div class='bg-white p-4 rounded-xl border border-gray-100 shadow-sm' id="q-container-${i}">
+                    <div class='text-gray-800 font-semibold mb-4 leading-relaxed'>
+                        <span class="inline-block bg-indigo-100 text-indigo-700 w-8 h-8 text-center leading-8 rounded-lg mr-2">${i+1}</span>
+                        ${s.q}
+                    </div>
+                    <div class='grid grid-cols-1 sm:grid-cols-2 gap-3'>`;
+            
+            s.a.forEach((opt, idx) => {
+                const char = String.fromCharCode(65 + idx);
+                html += `
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="q${i}" value="${idx}" class="option-input hidden" onchange="updateProgress()">
+                        <div class="option-label border-2 border-gray-100 rounded-xl p-3 flex items-center hover:bg-gray-50 transition-all">
+                            <span class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg text-sm font-bold mr-3 text-gray-500 bg-white">${char}</span>
+                            <span class="text-gray-700 font-medium">${opt}</span>
+                        </div>
+                    </label>`;
+            });
+            html += `</div></div>`;
+        });
+        
+        document.getElementById('isiSoal').innerHTML = html;
+
+        let timeLeft = 10 * 60;
+        timer = setInterval(() => {
+            timeLeft--;
+            let min = Math.floor(timeLeft / 60);
+            let sec = timeLeft % 60;
+            document.getElementById('time').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                hitungDanTampilkanHasil();
+            }
+        }, 1000);
+    }
+
+    function updateProgress() {
+        const total = soalData.length;
+        let answered = 0;
+        for (let i = 0; i < total; i++) {
+            if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
+        }
+        document.getElementById('progressBar').style.width = (answered / total) * 100 + '%';
+    }
+
+    function tampilkanKonfirmasiSelesai() {
+        showModal({
+            title: "Kirim Jawaban?",
+            desc: "Pastikan semua soal telah terjawab dengan teliti sebelum mengirim.",
+            btnText: "YA, SELESAI",
+            btnClass: "bg-emerald-600",
+            showCancel: true,
+            onConfirm: () => hitungDanTampilkanHasil()
+        });
+    }
+
+    function hitungDanTampilkanHasil() {
+        clearInterval(timer);
+        quizActive = false;
+        window.onblur = null;
+
+        const nama = document.getElementById('userName').value;
+        let benarCount = 0;
+        let nomorBenar = [];
+        let nomorSalah = [];
+
+        soalData.forEach((s, i) => {
+            const rbg = document.getElementsByName('q' + i);
+            let terpilih = -1;
+            for (let rb of rbg) { if (rb.checked) terpilih = parseInt(rb.value); }
+            if (terpilih === s.k) {
+                benarCount++;
+                nomorBenar.push(i + 1);
+            } else {
+                nomorSalah.push(i + 1);
+            }
+        });
+
+        const totalSkor = Math.round((benarCount / soalData.length) * 100);
+        document.getElementById('quizSection').classList.add('hidden');
+        document.getElementById('resultSection').classList.remove('hidden');
+        document.getElementById('displaySkor').innerText = totalSkor;
+        document.getElementById('resNama').innerText = nama;
+        document.getElementById('totalBenar').innerText = benarCount;
+        document.getElementById('totalSalah').innerText = soalData.length - benarCount;
+        
+        document.getElementById('detailList').innerHTML = `
+            <p>✅ <b>Nomor Benar:</b> ${nomorBenar.join(", ") || "-"}</p>
+            <p>❌ <b>Nomor Salah:</b> ${nomorSalah.join(", ") || "-"}</p>
+        `;
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ nama, skor: totalSkor, benar: nomorBenar.join(", "), salah: nomorSalah.join(", ") })
+        }).then(() => {
+            const st = document.getElementById('statusKirim');
+            st.innerText = "Data tersimpan di server ✓";
+            st.classList.replace('text-gray-400', 'text-emerald-600');
+        });
+    }
+</script>
+</body>
+</html>
